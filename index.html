@@ -2,403 +2,155 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>VibeOS | Ultimate Mobile Hub</title>
+    <!-- Phone: Friendly 19.5:9/9:19.5 aspect ratio & easy controls hook -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Redirecting to Google Gemini...</title>
     <style>
         :root {
-            --os-bg: #0e0e11;
-            --dock-bg: rgba(20, 20, 28, 0.85);
-            --card-bg: #1c1c24;
-            --text-main: #ffffff;
-            --text-muted: #9a9aae;
-            --accent: #5865f2;
-            --danger: #ed4245;
-            --success: #57f287;
-            --radius-app-icon: 20px;
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #e0e0e0;
+            --accent-color: #4285f4;
+            --accent-hover: #5a95f5;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--os-bg);
-            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            width: 100vw;
             height: 100vh;
-            height: 100dvh;
-            overflow: hidden;
-            position: fixed;
-            width: 100%;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             display: flex;
-            flex-direction: column;
-            overscroll-behavior: none;
-        }
-
-        button { font-family: inherit; cursor: pointer; border: none; background: none; }
-        
-        #screen-container { flex: 1; position: relative; width: 100%; overflow: hidden; }
-        .view { position: absolute; top: 0; left: 0; width: 100%; height: 100%; transition: transform 0.3s ease-in-out; display: flex; flex-direction: column; }
-        .view.hidden-right { transform: translateX(100%); }
-
-        /* LAUNCHER SCREEN */
-        #launcher-screen {
-            background: radial-gradient(circle at center, #29293d 0%, var(--os-bg) 100%);
-            padding: env(safe-area-inset-top) 20px 20px 20px;
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            grid-auto-rows: min-content;
-            gap: 25px 15px;
-            overflow-y: auto;
-            padding-bottom: 120px;
-            align-content: start;
-        }
-
-        .app-icon-wrapper {
-            display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
-            gap: 8px;
-            position: relative;
-        }
-
-        .app-icon-btn {
-            width: 70px; height: 70px;
-            background-color: #2a2a36;
-            border-radius: var(--radius-app-icon);
-            display: flex; justify-content: center; align-items: center;
             overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            border: 2px solid transparent;
-            transition: transform 0.15s;
+            /* Mobile touch optimization */
+            touch-action: manipulation;
         }
 
-        .app-icon-btn:active { transform: scale(0.95); }
-        .app-icon-btn img { width: 100%; height: 100%; object-fit: cover; }
-        .app-icon-placeholder { font-size: 2rem; color: var(--text-muted); }
-        
-        .app-label {
-            font-size: 0.75rem;
-            color: var(--text-main);
+        .container {
+            background-color: var(--card-bg);
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
             text-align: center;
-            width: 100%;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+            max-width: 400px;
+            width: 90%;
+            box-sizing: border-box;
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        body.edit-mode .app-icon-wrapper { animation: jiggle 0.5s infinite; }
-        body.edit-mode .app-icon-wrapper:nth-child(odd) { animation-delay: -0.1s; }
-        body.edit-mode .delete-badge { display: flex; }
-
-        .delete-badge {
-            position: absolute; -top: 8px; -right: 8px;
-            background: var(--danger); color: white;
-            width: 22px; height: 22px;
-            border-radius: 50%;
-            display: none;
-            justify-content: center; align-items: center;
-            font-weight: bold; font-size: 1.2rem;
-            z-index: 5;
-        }
-
-        @keyframes jiggle {
-            0% { transform: rotate(-1deg); }
-            50% { transform: rotate(1deg); }
-            100% { transform: rotate(-1deg); }
-        }
-
-        /* DOCK */
-        #dock {
-            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
-            width: 90%; max-width: 400px;
-            background-color: var(--dock-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-radius: 40px;
-            padding: 12px;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            z-index: 100;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-        }
-        
-        .dock-btn {
-            width: 50px; height: 50px;
-            border-radius: 50%;
-            display: flex; justify-content: center; align-items: center;
-            color: var(--text-muted);
+        h1 {
             font-size: 1.5rem;
-            transition: background 0.2s, color 0.2s;
-        }
-        
-        .dock-btn:active { background-color: rgba(255,255,255,0.1); }
-        .dock-btn.active { color: var(--accent); }
-        .dock-btn.edit-done { color: var(--success); font-weight: bold; font-size: 1rem; }
-
-        /* APP RUNNER */
-        #app-runner {
-            position: absolute; top: 100%; left: 0;
-            width: 100%; height: 100%;
-            background: white;
-            z-index: 200;
-            display: flex; flex-direction: column;
-            transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
-            box-shadow: 0 -10px 30px rgba(0,0,0,0.3);
+            margin-bottom: 0.5rem;
+            color: #ffffff;
         }
 
-        #app-runner.open { transform: translateY(-100%); }
-        
-        #runner-handle-bar {
-            height: 25px; background: #f0f0f0;
-            display: flex; justify-content: center; align-items: center;
-            cursor: ns-resize;
-            border-bottom: 1px solid #e0e0e0;
+        p {
+            font-size: 0.95rem;
+            color: #aaa;
+            margin-bottom: 1.5rem;
         }
 
-        #runner-handle { width: 40px; height: 5px; background: #ccc; border-radius: 3px; }
-        #runner-iframe { flex: 1; width: 100%; border: none; background: white; }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(66, 133, 244, 0.2);
+            border-top: 4px solid var(--accent-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1.5rem auto;
+        }
 
-        /* UTILITY CLASSES */
-        .btn { padding: 8px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; }
-        .btn-primary { background-color: var(--accent); color: white; }
-        .btn-secondary { background-color: #444; color: white; }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: var(--accent-color);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: background-color 0.2s, transform 0.1s;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .btn:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .hints {
+            margin-top: 1rem;
+            font-size: 0.75rem;
+            color: #666;
+        }
     </style>
 </head>
 <body>
 
-    <div id="screen-container">
-        <!-- HOMESCREEN LAUNCHER -->
-        <div id="launcher-screen" class="view"></div>
-    </div>
-
-    <!-- DOCK -->
-    <nav id="dock">
-        <button class="dock-btn active" id="dock-home" title="Homescreen">🏠</button>
-        <button class="dock-btn" id="dock-dev" title="Dev Center">💻</button>
-        <button class="dock-btn" id="dock-edit" title="Edit Mode">⚙️</button>
-    </nav>
-
-    <!-- APP RUNNER -->
-    <div id="app-runner">
-        <div id="runner-handle-bar">
-            <div id="runner-handle"></div>
-        </div>
-        <iframe id="runner-iframe" sandbox="allow-scripts allow-same-origin allow-modals allow-forms"></iframe>
-    </div>
-
-    <script>
-        const STORAGE_KEY = "vibe_os_apps_v3";
+    <div class="container">
+        <div class="spinner"></div>
+        <h1>Taking you to Gemini</h1>
+        <p>Redirecting automatically in <span id="countdown">3</span> seconds...</p>
         
-        // Default Apps including Dev Center & Gemini Redirector
-        const DEFAULT_APPS = [
-            {
-                id: "dev_center",
-                name: "Dev Center",
-                iconUrl: "",
-                isRedirect: false,
-                redirectUrl: "",
-                code: `<!DOCTYPE html>
-<html>
-<head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style>
-body { background: #121216; color: #fff; font-family: sans-serif; padding: 20px; display: flex; flex-direction: column; height: 100vh; box-sizing: border-box; }
-h2 { color: #5865f2; margin-bottom: 10px; }
-input, select { width: 100%; padding: 10px; margin-bottom: 10px; background: #1c1c24; border: 1px solid #333; color: #fff; border-radius: 6px; }
-textarea { flex: 1; width: 100%; background: #0e0e11; color: #7ce3ff; font-family: monospace; padding: 10px; border: 1px solid #333; border-radius: 6px; resize: none; }
-.btn { background: #57f287; color: #000; padding: 10px; border: none; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 10px; }
-</style>
-</head>
-<body>
-    <h2>💻 Dev Center Hub</h2>
-    <input type="text" id="appName" placeholder="App Name">
-    <select id="appType" onchange="toggleType()">
-        <option value="code">Sandbox Code App</option>
-        <option value="redirect">Direct URL Redirect</option>
-    </select>
-    <input type="text" id="redirectUrl" placeholder="https://example.com" style="display:none;">
-    <textarea id="appCode" placeholder="<!-- HTML/JS Code -->"></textarea>
-    <button class="btn" onclick="saveNewApp()">🚀 Deploy App</button>
+        <!-- Manual Action Button (PC & Mobile fallback/control) -->
+        <a href="https://gemini.google.com" id="redirect-btn" class="btn">Click here if not redirected</a>
+
+        <div class="hints" id="control-hints">
+            <!-- PC: Keybinds / Mouse Tweaks | Mobile: Touch info -->
+            PC: Press [Enter] to go now, [Esc] to cancel. | Mobile: Tap button anytime.
+        </div>
+    </div>
+
     <script>
-        function toggleType() {
-            const isRed = document.getElementById('appType').value === 'redirect';
-            document.getElementById('redirectUrl').style.display = isRed ? 'block' : 'none';
-            document.getElementById('appCode').style.display = isRed ? 'none' : 'block';
-        }
-        function saveNewApp() {
-            const name = document.getElementById('appName').value || "New App";
-            const isRed = document.getElementById('appType').value === 'redirect';
-            const url = document.getElementById('redirectUrl').value;
-            const code = document.getElementById('appCode').value;
-            
-            const parentApps = JSON.parse(localStorage.getItem('vibe_os_apps_v3') || '[]');
-            parentApps.push({
-                id: 'app_' + Date.now(),
-                name: name,
-                iconUrl: '',
-                isRedirect: isRed,
-                redirectUrl: url,
-                code: code
-            });
-            localStorage.setItem('vibe_os_apps_v3', JSON.stringify(parentApps));
-            alert('App Deployed Successfully! Head back to homescreen.');
-        }
-    <\/script>
-</body>
-</html>`
-            },
-            {
-                id: "gemini_redirect",
-                name: "Gemini",
-                iconUrl: "",
-                isRedirect: true,
-                redirectUrl: "https://gemini.google.com",
-                code: ""
+        const targetUrl = "https://gemini.google.com";
+        let timeLeft = 3;
+        const countdownEl = document.getElementById("countdown");
+        
+        // Automatic redirection countdown loop
+        const countdownTimer = setInterval(() => {
+            timeLeft--;
+            countdownEl.textContent = timeLeft;
+            if (timeLeft <= 0) {
+                clearInterval(countdownTimer);
+                window.location.href = targetUrl;
             }
-        ];
+        }, 1000);
 
-        let apps = [];
-        let isEditMode = false;
-
-        const launcherScreen = document.getElementById('launcher-screen');
-        const appRunner = document.getElementById('app-runner');
-        const runnerIframe = document.getElementById('runner-iframe');
-        const dockHome = document.getElementById('dock-home');
-        const dockDev = document.getElementById('dock-dev');
-        const dockEdit = document.getElementById('dock-edit');
-
-        function initOS() {
-            const stored = localStorage.getItem(STORAGE_KEY);
-            if (stored) {
-                try { apps = JSON.parse(stored); } catch(e) { apps = DEFAULT_APPS; }
-            } else {
-                apps = DEFAULT_APPS;
-                saveApps();
+        // PC Controls: Keybinds & Mouse Tweaks
+        window.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                // Instant redirect on Enter key
+                window.location.href = targetUrl;
+            } else if (e.key === "Escape") {
+                // Cancel redirection on Escape key
+                clearInterval(countdownTimer);
+                document.querySelector("h1").textContent = "Redirection Cancelled";
+                document.querySelector("p").textContent = "You can stay here or click below when ready.";
+                document.getElementById("spinner").style.display = "none";
             }
-            renderLauncher();
-        }
-
-        function saveApps() {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(apps));
-        }
-
-        function renderLauncher() {
-            launcherScreen.innerHTML = '';
-            apps.forEach(app => {
-                const wrapper = document.createElement('div');
-                wrapper.className = 'app-icon-wrapper';
-                
-                const deleteBadge = document.createElement('button');
-                deleteBadge.className = 'delete-badge';
-                deleteBadge.innerHTML = '×';
-                deleteBadge.onclick = (e) => {
-                    e.stopPropagation();
-                    deleteApp(app.id);
-                };
-                wrapper.appendChild(deleteBadge);
-
-                const btn = document.createElement('div');
-                btn.className = 'app-icon-btn';
-                
-                if (app.iconUrl) {
-                    const img = document.createElement('img');
-                    img.src = app.iconUrl;
-                    btn.appendChild(img);
-                } else {
-                    const ph = document.createElement('div');
-                    ph.className = 'app-icon-placeholder';
-                    ph.textContent = app.name ? app.name.charAt(0).toUpperCase() : '⚡';
-                    btn.appendChild(ph);
-                }
-
-                btn.onclick = () => {
-                    if (isEditMode) return;
-                    if (app.isRedirect && app.redirectUrl) {
-                        window.location.href = app.redirectUrl;
-                    } else {
-                        launchApp(app);
-                    }
-                };
-
-                wrapper.appendChild(btn);
-
-                const label = document.createElement('div');
-                label.className = 'app-label';
-                label.textContent = app.name;
-                wrapper.appendChild(label);
-
-                launcherScreen.appendChild(wrapper);
-            });
-        }
-
-        function launchApp(app) {
-            const doc = runnerIframe.contentDocument || runnerIframe.contentWindow.document;
-            doc.open();
-            doc.write(app.code);
-            doc.close();
-            appRunner.classList.add('open');
-        }
-
-        function closeAppRunner() {
-            appRunner.classList.remove('open');
-            setTimeout(() => { runnerIframe.src = 'about:blank'; }, 300);
-        }
-
-        function deleteApp(id) {
-            if (confirm("Delete this app?")) {
-                apps = apps.filter(a => a.id !== id);
-                saveApps();
-                renderLauncher();
-            }
-        }
-
-        function toggleEditMode() {
-            isEditMode = !isEditMode;
-            if (isEditMode) {
-                document.body.classList.add('edit-mode');
-                dockEdit.classList.add('active', 'edit-done');
-                dockEdit.textContent = '✓ Done';
-            } else {
-                document.body.classList.remove('edit-mode');
-                dockEdit.classList.remove('active', 'edit-done');
-                dockEdit.textContent = '⚙️';
-            }
-        }
-
-        dockHome.onclick = () => {
-            toggleEditMode(false);
-            closeAppRunner();
-            initOS(); // Refresh list in case new app was added from Dev Center
-        };
-
-        dockDev.onclick = () => {
-            toggleEditMode(false);
-            const devApp = apps.find(a => a.id === 'dev_center') || DEFAULT_APPS[0];
-            launchApp(devApp);
-        };
-
-        dockEdit.onclick = () => {
-            toggleEditMode();
-        };
-
-        // Swipe down gesture
-        let startY = 0, currentY = 0;
-        const handleBar = document.getElementById('runner-handle-bar');
-        handleBar.addEventListener('touchstart', (e) => { startY = e.touches[0].clientY; }, { passive: true });
-        handleBar.addEventListener('touchmove', (e) => {
-            currentY = e.touches[0].clientY;
-            let diff = currentY - startY;
-            if (diff > 0) appRunner.style.transform = `translateY(calc(-100% + ${diff}px))`;
-        }, { passive: true });
-        handleBar.addEventListener('touchend', () => {
-            let diff = currentY - startY;
-            appRunner.style.transition = 'transform 0.3s cubic-bezier(0.32, 0.72, 0, 1)';
-            if (diff > 100) closeAppRunner();
-            else appRunner.style.transform = 'translateY(-100%)';
-            startY = 0; currentY = 0;
         });
 
-        initOS();
+        // Mobile Controls / Touch handling hooks
+        const btn = document.getElementById("redirect-btn");
+        btn.addEventListener("touchstart", () => {
+            // Immediate trigger hook for mobile touch controls
+            window.location.href = targetUrl;
+        }, { passive: true });
     </script>
 </body>
 </html>

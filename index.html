@@ -2,155 +2,395 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <!-- Phone: Friendly 19.5:9/9:19.5 aspect ratio & easy controls hook -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Redirecting to Google Gemini...</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>VibeOS | 3-Button Navigation</title>
     <style>
         :root {
-            --bg-color: #121212;
-            --card-bg: #1e1e1e;
-            --text-color: #e0e0e0;
-            --accent-color: #4285f4;
-            --accent-hover: #5a95f5;
+            --os-bg: #0e0e11;
+            --navbar-bg: #14141c;
+            --card-bg: #1c1c24;
+            --text-main: #ffffff;
+            --text-muted: #9a9aae;
+            --accent: #5865f2;
+            --danger: #ed4245;
+            --success: #57f287;
+            --radius-app-icon: 20px;
         }
 
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
         body {
-            margin: 0;
-            padding: 0;
-            width: 100vw;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--os-bg);
+            color: var(--text-main);
             height: 100vh;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            height: 100dvh;
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            overscroll-behavior: none;
+        }
+
+        button { font-family: inherit; cursor: pointer; border: none; background: none; }
+
+        /* SCREEN CONTAINER */
+        #screen-container {
+            flex: 1;
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* LAUNCHER SCREEN */
+        #launcher-screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, #29293d 0%, var(--os-bg) 100%);
+            padding: env(safe-area-inset-top) 20px 20px 20px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-auto-rows: min-content;
+            gap: 25px 15px;
+            overflow-y: auto;
+            padding-bottom: 90px; /* Space for navbar */
+            align-content: start;
+        }
+
+        .app-icon-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+        }
+
+        .app-icon-btn {
+            width: 70px; height: 70px;
+            background-color: #2a2a36;
+            border-radius: var(--radius-app-icon);
+            display: flex; justify-content: center; align-items: center;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            border: 2px solid transparent;
+            transition: transform 0.15s;
+        }
+
+        .app-icon-btn:active { transform: scale(0.95); }
+        .app-icon-btn img { width: 100%; height: 100%; object-fit: cover; }
+        .app-icon-placeholder { font-size: 2rem; color: var(--text-muted); }
+        
+        .app-label {
+            font-size: 0.75rem;
+            color: var(--text-main);
+            text-align: center;
+            width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+        }
+
+        body.edit-mode .app-icon-wrapper { animation: jiggle 0.5s infinite; }
+        body.edit-mode .app-icon-wrapper:nth-child(odd) { animation-delay: -0.1s; }
+        body.edit-mode .delete-badge { display: flex; }
+
+        .delete-badge {
+            position: absolute; -top: 8px; -right: 8px;
+            background: var(--danger); color: white;
+            width: 22px; height: 22px;
+            border-radius: 50%;
+            display: none;
+            justify-content: center; align-items: center;
+            font-weight: bold; font-size: 1.2rem;
+            z-index: 5;
+        }
+
+        @keyframes jiggle {
+            0% { transform: rotate(-1deg); }
+            50% { transform: rotate(1deg); }
+            100% { transform: rotate(-1deg); }
+        }
+
+        /* APP RUNNER VIEW */
+        #app-runner {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: white;
+            z-index: 100;
+            display: none;
+            flex-direction: column;
+        }
+        #app-runner.active { display: flex; }
+        #runner-iframe { flex: 1; width: 100%; border: none; background: white; }
+
+        /* CLASSIC 3-BUTTON NAVBAR */
+        #nav-bar {
+            height: 60px;
+            background-color: var(--navbar-bg);
+            border-top: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 300;
+            flex-shrink: 0;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.4rem;
+            width: 60px;
+            height: 100%;
             display: flex;
             justify-content: center;
             align-items: center;
-            overflow: hidden;
-            /* Mobile touch optimization */
-            touch-action: manipulation;
+            transition: color 0.2s, background 0.1s;
         }
 
-        .container {
-            background-color: var(--card-bg);
-            padding: 2.5rem;
-            border-radius: 16px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-            text-align: center;
-            max-width: 400px;
-            width: 90%;
-            box-sizing: border-box;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        h1 {
-            font-size: 1.5rem;
-            margin-bottom: 0.5rem;
-            color: #ffffff;
-        }
-
-        p {
-            font-size: 0.95rem;
-            color: #aaa;
-            margin-bottom: 1.5rem;
-        }
-
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid rgba(66, 133, 244, 0.2);
-            border-top: 4px solid var(--accent-color);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 1.5rem auto;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .btn {
-            display: inline-block;
-            background-color: var(--accent-color);
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 0.95rem;
-            transition: background-color 0.2s, transform 0.1s;
-            border: none;
-            cursor: pointer;
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        .btn:hover {
-            background-color: var(--accent-hover);
-        }
-
-        .btn:active {
-            transform: scale(0.98);
-        }
-
-        .hints {
-            margin-top: 1rem;
-            font-size: 0.75rem;
-            color: #666;
+        .nav-btn:active {
+            background-color: rgba(255,255,255,0.05);
+            color: var(--text-main);
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <div class="spinner"></div>
-        <h1>Taking you to Gemini</h1>
-        <p>Redirecting automatically in <span id="countdown">3</span> seconds...</p>
-        
-        <!-- Manual Action Button (PC & Mobile fallback/control) -->
-        <a href="https://gemini.google.com" id="redirect-btn" class="btn">Click here if not redirected</a>
+    <div id="screen-container">
+        <!-- HOMESCREEN LAUNCHER -->
+        <div id="launcher-screen"></div>
 
-        <div class="hints" id="control-hints">
-            <!-- PC: Keybinds / Mouse Tweaks | Mobile: Touch info -->
-            PC: Press [Enter] to go now, [Esc] to cancel. | Mobile: Tap button anytime.
+        <!-- APP RUNNER -->
+        <div id="app-runner">
+            <iframe id="runner-iframe" sandbox="allow-scripts allow-same-origin allow-modals allow-forms"></iframe>
         </div>
     </div>
 
+    <!-- 3-BUTTON SYSTEM NAVBAR -->
+    <nav id="nav-bar">
+        <button class="nav-btn" id="nav-back" title="Back / Close App">◀</button>
+        <button class="nav-btn" id="nav-home" title="Home">🏠</button>
+        <button class="nav-btn" id="nav-dev" title="Dev Center">💻</button>
+    </nav>
+
     <script>
-        const targetUrl = "https://gemini.google.com";
-        let timeLeft = 3;
-        const countdownEl = document.getElementById("countdown");
+        const STORAGE_KEY = "vibe_os_apps_v4";
         
-        // Automatic redirection countdown loop
-        const countdownTimer = setInterval(() => {
-            timeLeft--;
-            countdownEl.textContent = timeLeft;
-            if (timeLeft <= 0) {
-                clearInterval(countdownTimer);
-                window.location.href = targetUrl;
+        const DEFAULT_APPS = [
+            {
+                id: "dev_center",
+                name: "Dev Center",
+                iconUrl: "",
+                isRedirect: false,
+                redirectUrl: "",
+                code: `<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body { background: #121216; color: #fff; font-family: sans-serif; padding: 20px; display: flex; flex-direction: column; height: 100vh; box-sizing: border-box; }
+h2 { color: #5865f2; margin-bottom: 10px; }
+input, select { width: 100%; padding: 10px; margin-bottom: 10px; background: #1c1c24; border: 1px solid #333; color: #fff; border-radius: 6px; }
+textarea { flex: 1; width: 100%; background: #0e0e11; color: #7ce3ff; font-family: monospace; padding: 10px; border: 1px solid #333; border-radius: 6px; resize: none; }
+.btn { background: #57f287; color: #000; padding: 10px; border: none; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 10px; }
+</style>
+</head>
+<body>
+    <h2>💻 Dev Center Hub</h2>
+    <input type="text" id="appName" placeholder="App Name">
+    <select id="appType" onchange="toggleType()">
+        <option value="code">Sandbox Code App</option>
+        <option value="redirect">Direct URL Redirect</option>
+    </select>
+    <input type="text" id="redirectUrl" placeholder="https://example.com" style="display:none;">
+    <textarea id="appCode" placeholder="<!-- HTML/JS Code -->"></textarea>
+    <button class="btn" onclick="saveNewApp()">🚀 Deploy App</button>
+    <script>
+        function toggleType() {
+            const isRed = document.getElementById('appType').value === 'redirect';
+            document.getElementById('redirectUrl').style.display = isRed ? 'block' : 'none';
+            document.getElementById('appCode').style.display = isRed ? 'none' : 'block';
+        }
+        function saveNewApp() {
+            const name = document.getElementById('appName').value || "New App";
+            const isRed = document.getElementById('appType').value === 'redirect';
+            const url = document.getElementById('redirectUrl').value;
+            const code = document.getElementById('appCode').value;
+            
+            const parentApps = JSON.parse(localStorage.getItem('vibe_os_apps_v4') || '[]');
+            parentApps.push({
+                id: 'app_' + Date.now(),
+                name: name,
+                iconUrl: '',
+                isRedirect: isRed,
+                redirectUrl: url,
+                code: code
+            });
+            localStorage.setItem('vibe_os_apps_v4', JSON.stringify(parentApps));
+            alert('App Deployed Successfully! Hit Home to go back.');
+        }
+    <\/script>
+</body>
+</html>`
+            },
+            {
+                id: "gemini_redirect",
+                name: "Gemini",
+                iconUrl: "",
+                isRedirect: true,
+                redirectUrl: "https://gemini.google.com",
+                code: ""
             }
-        }, 1000);
+        ];
 
-        // PC Controls: Keybinds & Mouse Tweaks
-        window.addEventListener("keydown", (e) => {
-            if (e.key === "Enter") {
-                // Instant redirect on Enter key
-                window.location.href = targetUrl;
-            } else if (e.key === "Escape") {
-                // Cancel redirection on Escape key
-                clearInterval(countdownTimer);
-                document.querySelector("h1").textContent = "Redirection Cancelled";
-                document.querySelector("p").textContent = "You can stay here or click below when ready.";
-                document.getElementById("spinner").style.display = "none";
+        let apps = [];
+        let isEditMode = false;
+
+        const launcherScreen = document.getElementById('launcher-screen');
+        const appRunner = document.getElementById('app-runner');
+        const runnerIframe = document.getElementById('runner-iframe');
+        
+        const navBack = document.getElementById('nav-back');
+        const navHome = document.getElementById('nav-home');
+        const navDev = document.getElementById('nav-dev');
+
+        function initOS() {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            if (stored) {
+                try { apps = JSON.parse(stored); } catch(e) { apps = DEFAULT_APPS; }
+            } else {
+                apps = DEFAULT_APPS;
+                saveApps();
             }
-        });
+            renderLauncher();
+        }
 
-        // Mobile Controls / Touch handling hooks
-        const btn = document.getElementById("redirect-btn");
-        btn.addEventListener("touchstart", () => {
-            // Immediate trigger hook for mobile touch controls
-            window.location.href = targetUrl;
-        }, { passive: true });
+        function saveApps() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(apps));
+        }
+
+        function renderLauncher() {
+            launcherScreen.innerHTML = '';
+            apps.forEach(app => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'app-icon-wrapper';
+                
+                const deleteBadge = document.createElement('button');
+                deleteBadge.className = 'delete-badge';
+                deleteBadge.innerHTML = '×';
+                deleteBadge.onclick = (e) => {
+                    e.stopPropagation();
+                    deleteApp(app.id);
+                };
+                wrapper.appendChild(deleteBadge);
+
+                const btn = document.createElement('div');
+                btn.className = 'app-icon-btn';
+                
+                if (app.iconUrl) {
+                    const img = document.createElement('img');
+                    img.src = app.iconUrl;
+                    btn.appendChild(img);
+                } else {
+                    const ph = document.createElement('div');
+                    ph.className = 'app-icon-placeholder';
+                    ph.textContent = app.name ? app.name.charAt(0).toUpperCase() : '⚡';
+                    btn.appendChild(ph);
+                }
+
+                // Long press or normal click for edit mode vs launching
+                let pressTimer;
+                btn.onmousedown = btn.onttouchstart = () => {
+                    pressTimer = setTimeout(() => {
+                        toggleEditMode(true);
+                    }, 600); // Hold for 0.6s to trigger jiggle mode
+                };
+
+                btn.onmouseup = btn.ontouchend = () => {
+                    clearTimeout(pressTimer);
+                };
+
+                btn.onclick = (e) => {
+                    e.stopPropagation();
+                    if (isEditMode) return;
+                    if (app.isRedirect && app.redirectUrl) {
+                        window.location.href = app.redirectUrl;
+                    } else {
+                        launchApp(app);
+                    }
+                };
+
+                wrapper.appendChild(btn);
+
+                const label = document.createElement('div');
+                label.className = 'app-label';
+                label.textContent = app.name;
+                wrapper.appendChild(label);
+
+                launcherScreen.appendChild(wrapper);
+            });
+        }
+
+        function launchApp(app) {
+            toggleEditMode(false);
+            const doc = runnerIframe.contentDocument || runnerIframe.contentWindow.document;
+            doc.open();
+            doc.write(app.code);
+            doc.close();
+            appRunner.classList.add('active');
+        }
+
+        function closeAppRunner() {
+            appRunner.classList.remove('active');
+            runnerIframe.src = 'about:blank';
+            initOS(); // Refresh launcher apps list
+        }
+
+        function deleteApp(id) {
+            if (confirm("Delete this app?")) {
+                apps = apps.filter(a => a.id !== id);
+                saveApps();
+                renderLauncher();
+            }
+        }
+
+        function toggleEditMode(forceState) {
+            isEditMode = forceState !== undefined ? forceState : !isEditMode;
+            if (isEditMode) {
+                document.body.classList.add('edit-mode');
+            } else {
+                document.body.classList.remove('edit-mode');
+            }
+        }
+
+        // 3-Button Navigation Actions
+        navBack.onclick = () => {
+            if (appRunner.classList.contains('active')) {
+                closeAppRunner();
+            } else {
+                toggleEditMode(false);
+            }
+        };
+
+        navHome.onclick = () => {
+            closeAppRunner();
+            toggleEditMode(false);
+        };
+
+        navDev.onclick = () => {
+            toggleEditMode(false);
+            const devApp = apps.find(a => a.id === 'dev_center') || DEFAULT_APPS[0];
+            launchApp(devApp);
+        };
+
+        // Click outside apps to exit jiggle mode
+        launcherScreen.onclick = () => {
+            if (isEditMode) toggleEditMode(false);
+        };
+
+        initOS();
     </script>
 </body>
 </html>
